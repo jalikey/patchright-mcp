@@ -1,6 +1,6 @@
 {
 	"name": "patchright-mcp",
-	"version": "0.0.55",
+	"version": "0.0.56",
 	"description": "Patchright Tools for MCP",
 	"repository": {
 		"type": "git",
@@ -37,7 +37,9 @@
 		}
 	},
 	"dependencies": {
-		"patchright": "1.57.0"
+		"patchright": "1.57.0",
+		"playwright-extra": "^4.3.6",
+		"puppeteer-extra-plugin-stealth": "^2.11.2"
 	},
 	"bin": {
 		"mcp-server-patchright": "cli.js"

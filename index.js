@@ -15,5 +15,7 @@
  * limitations under the License.
  */
 
+require('./playwright-extra-setup');
+
 const { createConnection } = require('patchright/lib/mcp/index');
 module.exports = { createConnection };

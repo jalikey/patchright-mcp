@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+require('./playwright-extra-setup');
+
 const { program } = require('patchright-core/lib/utilsBundle');
 const { decorateCommand } = require('patchright/lib/mcp/program');
 
