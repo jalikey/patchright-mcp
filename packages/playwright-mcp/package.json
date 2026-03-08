@@ -1,0 +1,42 @@
+{
+  "name": "patchright-mcp",
+  "version": "0.0.68",
+  "description": "Patchright Tools for MCP",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp.git"
+  },
+  "homepage": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp",
+  "engines": {
+    "node": ">=18"
+  },
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "lint": "node update-readme.js",
+    "test": "patchright test",
+    "ctest": "patchright test --project=chrome",
+    "ftest": "patchright test --project=firefox",
+    "wtest": "patchright test --project=webkit",
+    "dtest": "MCP_IN_DOCKER=1 patchright test --project=chromium-docker",
+    "build": "echo OK",
+    "npm-publish": "npm run lint && npm run test && npm publish"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "dependencies": {
+    "patchright": "1.58.2",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "bin": {
+    "mcp-server-patchright": "cli.js"
+  }
+}

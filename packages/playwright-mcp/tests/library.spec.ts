@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import child_process from 'child_process';
+import fs from 'fs/promises';
 import { test, expect } from './fixtures';
 
-test('browser_navigate', async ({ client, server }) => {
-  expect(await client.callTool({
-    name: 'browser_navigate',
-    arguments: { url: server.HELLO_WORLD },
-  })).toHaveResponse({
-    code: `await page.goto('${server.HELLO_WORLD}');`,
-    pageState: `- Page URL: ${server.HELLO_WORLD}
-- Page Title: Title
-- Page Snapshot:
-\`\`\`yaml
-- generic [active] [ref=e1]: Hello, world!
-\`\`\``,
-  });
+test('library can be used from CommonJS', { annotation: { type: 'issue', description: 'https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp/issues/456' } }, async ({}, testInfo) => {
+  const file = testInfo.outputPath('main.cjs');
+  await fs.writeFile(file, `
+    import('patchright-mcp')
+      .then(playwrightMCP => playwrightMCP.createConnection())
+      .then(() => console.log('OK'));
+ `);
+  expect(child_process.execSync(`node ${file}`, { encoding: 'utf-8' })).toContain('OK');
 });

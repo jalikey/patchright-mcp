@@ -1,51 +1,32 @@
 {
-	"name": "patchright-mcp",
-	"version": "0.0.58",
-	"description": "Patchright Tools for MCP",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp.git"
-	},
-	"homepage": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp",
-	"engines": {
-		"node": ">=18"
-	},
-	"author": {
-		"name": "Microsoft Corporation"
-	},
-	"license": "Apache-2.0",
-	"scripts": {
-		"lint": "npm run update-readme",
-		"update-readme": "node update-readme.js",
-		"docker-build": "docker build --no-cache -t patchright-mcp-dev:latest .",
-		"docker-rm": "docker rm patchright-mcp-dev",
-		"docker-run": "docker run -it -p 8080:8080 --name patchright-mcp-dev patchright-mcp-dev:latest",
-		"test": "patchright test",
-		"ctest": "patchright test --project=chrome",
-		"ftest": "patchright test --project=firefox",
-		"wtest": "patchright test --project=webkit",
-		"dtest": "MCP_IN_DOCKER=1 patchright test --project=chromium-docker",
-		"npm-publish": "npm run clean && npm run test && npm publish",
-		"copy-config": "cp ../playwright/packages/playwright/src/mcp/config.d.ts . && perl -pi -e \"s|import type \\* as playwright from 'playwright-core';|import type * as playwright from 'patchright';|\" ./config.d.ts",
-		"roll": "npm run copy-config && npm run lint"
-	},
-	"exports": {
-		"./package.json": "./package.json",
-		".": {
-			"types": "./index.d.ts",
-			"default": "./index.js"
-		}
-	},
-	"dependencies": {
-		"patchright": "1.57.0",
-		"playwright-extra": "^4.3.6",
-		"puppeteer-extra-plugin-stealth": "^2.11.2"
-	},
-	"bin": {
-		"mcp-server-patchright": "cli.js"
-	},
-	"devDependencies": {
-		"@modelcontextprotocol/sdk": "^1.24.0",
-		"@types/node": "^24.3.0"
-	}
+  "name": "patchright-mcp-internal",
+  "version": "0.0.68",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp.git"
+  },
+  "homepage": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp",
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "docker-build": "docker build --no-cache -t patchright-mcp-dev:latest .",
+    "docker-rm": "docker rm patchright-mcp-dev",
+    "docker-run": "docker run -it -p 8080:8080 --name patchright-mcp-dev patchright-mcp-dev:latest",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "build": "npm run build --workspaces",
+    "bump": "npm version --workspaces --no-git-tag-version",
+    "roll": "node roll.js"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@types/node": "^24.3.0",
+    "patchright": "1.58.2"
+  }
 }

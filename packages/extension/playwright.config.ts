@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import child_process from 'child_process';
-import fs from 'fs/promises';
-import { test, expect } from './fixtures';
 
-test('library can be used from CommonJS', { annotation: { type: 'issue', description: 'https://github.com/microsoft/playwright-mcp/issues/456' } }, async ({}, testInfo) => {
-  const file = testInfo.outputPath('main.cjs');
-  await fs.writeFile(file, `
-    import('patchright-mcp')
-      .then(playwrightMCP => playwrightMCP.createConnection())
-      .then(() => console.log('OK'));
- `);
-  expect(child_process.execSync(`node ${file}`, { encoding: 'utf-8' })).toContain('OK');
+import { defineConfig } from 'patchright/test';
+
+import type { TestOptions } from '../playwright-mcp/tests/fixtures';
+
+export default defineConfig<TestOptions>({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'list',
+  projects: [
+    { name: 'chromium', use: { mcpBrowser: 'chromium' } },
+  ],
 });

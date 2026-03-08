@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import { defineConfig } from 'patchright/test';
+import { test, expect } from './fixtures';
 
-import type { TestOptions } from '../tests/fixtures';
-
-export default defineConfig<TestOptions>({
-  testDir: './tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'list',
-  projects: [
-    { name: 'chromium', use: { mcpBrowser: 'chromium' } },
-  ],
+test('browser_navigate', async ({ client, server }) => {
+  expect(await client.callTool({
+    name: 'browser_navigate',
+    arguments: { url: server.HELLO_WORLD },
+  })).toHaveResponse({
+    code: `await page.goto('${server.HELLO_WORLD}');`,
+    snapshot: expect.stringContaining(`generic [active] [ref=e1]: Hello, world!`),
+  });
 });

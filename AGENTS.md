@@ -8,24 +8,24 @@ These instructions are for coding agents updating upstream versions or the Patch
    - `npm view @playwright/mcp version`
 2) Sync versions across this repo:
    - `package.json` -> `version`
-   - `extension/package.json` -> `version`
-   - `extension/manifest.json` -> `version`
+   - `packages/extension/package.json` -> `version`
+   - `packages/extension/manifest.json` -> `version`
 3) Refresh lockfiles:
    - `npm install --package-lock-only`
-   - `cd extension && npm install --package-lock-only`
+   - `npm install --package-lock-only --workspace=packages/extension`
 4) Sanity-check:
-   - `rg -n "\"version\"" package.json extension/package.json extension/manifest.json` to confirm versions match.
+   - `rg -n "\"version\"" package.json packages/extension/package.json packages/extension/manifest.json` to confirm versions match.
 
 ## Update the Patchright version
 
 1) Check the latest Patchright version:
    - `npm view patchright version`
 2) Update dependency:
-   - `package.json` -> `dependencies.patchright`
+   - `packages/playwright-mcp/package.json` -> `dependencies.patchright`
 3) Refresh lockfile:
    - `npm install --package-lock-only`
 4) Sanity-check:
-   - `rg -n "patchright" package.json package-lock.json` to confirm the new version is captured.
+   - `rg -n "patchright" packages/playwright-mcp/package.json package-lock.json` to confirm the new version is captured.
 
 ## Notes
 

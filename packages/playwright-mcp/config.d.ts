@@ -16,7 +16,19 @@
 
 import type * as playwright from 'patchright';
 
-export type ToolCapability = 'core' | 'core-tabs' | 'core-install' | 'vision' | 'pdf' | 'testing' | 'tracing';
+export type ToolCapability =
+  'config' |
+  'core' |
+  'core-navigation' |
+  'core-tabs' |
+  'core-input' |
+  'core-install' |
+  'network' |
+  'pdf' |
+  'storage' |
+  'testing' |
+  'vision' |
+  'devtools';
 
 export type Config = {
   /**
@@ -41,7 +53,7 @@ export type Config = {
 
     /**
      * Launch options passed to
-     * @see https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context
+     * @see https://github.com/Kaliiiiiiiiii-Vinyzu/patchright/tree/main/docs/src/api/class-browsertype.md#browsertypelaunchpersistentcontextuserdata-dir-options
      *
      * This is useful for settings options like `channel`, `headless`, `executablePath`, etc.
      */
@@ -65,12 +77,17 @@ export type Config = {
     cdpHeaders?: Record<string, string>;
 
     /**
-     * Remote endpoint to connect to an existing Playwright server.
+     * Timeout in milliseconds for connecting to CDP endpoint. Defaults to 30000 (30 seconds). Pass 0 to disable timeout.
+     */
+    cdpTimeout?: number;
+
+    /**
+     * Remote endpoint to connect to an existing Patchright server.
      */
     remoteEndpoint?: string;
 
     /**
-     * Paths to TypeScript files to add as initialization scripts for Playwright page.
+     * Paths to TypeScript files to add as initialization scripts for Patchright page.
      */
     initPage?: string[];
 
@@ -80,6 +97,13 @@ export type Config = {
      */
     initScript?: string[];
   },
+
+  /**
+   * Connect to a running browser instance (Edge/Chrome only). If specified, `browser`
+   * config is ignored.
+   * Requires the "Patchright MCP Bridge" browser extension to be installed.
+   */
+  extension?: boolean;
 
   server?: {
     /**
@@ -104,21 +128,22 @@ export type Config = {
    *   - 'core': Core browser automation features.
    *   - 'pdf': PDF generation and manipulation.
    *   - 'vision': Coordinate-based interactions.
+   *   - 'devtools': Developer tools features.
    */
   capabilities?: ToolCapability[];
 
   /**
-   * Whether to save the Playwright session into the output directory.
+   * Whether to save the Patchright session into the output directory.
    */
   saveSession?: boolean;
 
   /**
-   * Whether to save the Playwright trace of the session into the output directory.
+   * Whether to save the Patchright trace of the session into the output directory.
    */
   saveTrace?: boolean;
 
   /**
-   * If specified, saves the Playwright video of the session into the output directory.
+   * If specified, saves the Patchright video of the session into the output directory.
    */
   saveVideo?: {
     width: number;
@@ -142,6 +167,11 @@ export type Config = {
    */
   outputDir?: string;
 
+  /**
+   * Whether to save snapshots, console messages, network logs and other session logs to a file or to the standard output. Defaults to "stdout".
+   */
+  outputMode?: 'file' | 'stdout';
+
   console?: {
     /**
      * The level of console messages to return. Each level includes the messages of more severe levels. Defaults to "info".
@@ -152,11 +182,19 @@ export type Config = {
   network?: {
     /**
      * List of origins to allow the browser to request. Default is to allow all. Origins matching both `allowedOrigins` and `blockedOrigins` will be blocked.
+     *
+     * Supported formats:
+     * - Full origin: `https://example.com:8080` - matches only that origin
+     * - Wildcard port: `http://localhost:*` - matches any port on localhost with http protocol
      */
     allowedOrigins?: string[];
 
     /**
      * List of origins to block the browser to request. Origins matching both `allowedOrigins` and `blockedOrigins` will be blocked.
+     *
+     * Supported formats:
+     * - Full origin: `https://example.com:8080` - matches only that origin
+     * - Wildcard port: `http://localhost:*` - matches any port on localhost with http protocol
      */
     blockedOrigins?: string[];
   };
@@ -168,12 +206,12 @@ export type Config = {
 
   timeouts?: {
     /*
-     * Configures default action timeout: https://playwright.dev/docs/api/class-page#page-set-default-timeout. Defaults to 5000ms.
+     * Configures default action timeout: https://github.com/Kaliiiiiiiiii-Vinyzu/patchright/tree/main/docs/src/api/class-page.md#pagesetdefaulttimeouttimeout. Defaults to 5000ms.
      */
     action?: number;
 
     /*
-     * Configures default navigation timeout: https://playwright.dev/docs/api/class-page#page-set-default-navigation-timeout. Defaults to 60000ms.
+     * Configures default navigation timeout: https://github.com/Kaliiiiiiiiii-Vinyzu/patchright/tree/main/docs/src/api/class-page.md#pagesetdefaultnavigationtimeouttimeout. Defaults to 60000ms.
      */
     navigation?: number;
   };
@@ -188,11 +226,16 @@ export type Config = {
      * When taking snapshots for responses, specifies the mode to use.
      */
     mode?: 'incremental' | 'full' | 'none';
-  }
+  };
 
   /**
    * Whether to allow file uploads from anywhere on the file system.
    * By default (false), file uploads are restricted to paths within the MCP roots only.
    */
   allowUnrestrictedFileAccess?: boolean;
+
+  /**
+   * Specify the language to use for code generation.
+   */
+  codegen?: 'typescript' | 'none';
 };

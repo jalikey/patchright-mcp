@@ -229,7 +229,7 @@ const ConnectApp: React.FC = () => {
 };
 
 const VersionMismatchError: React.FC<{ extensionVersion: string }> = ({ extensionVersion }) => {
-  const readmeUrl = 'https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp/blob/main/extension/README.md';
+  const readmeUrl = 'https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp/blob/main/packages/extension/README.md';
   const latestReleaseUrl = 'https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp/releases/latest';
   return (
     <div>

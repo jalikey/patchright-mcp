@@ -10,16 +10,9 @@ The Patchright MCP Chrome Extension allows you to connect to pages in your exist
 
 ## Installation Steps
 
-### Download the Extension
+### Install the Extension
 
-Download the latest Chrome extension from GitHub:
-- **Download link**: https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp/releases
-
-### Load Chrome Extension
-
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in the top right corner)
-3. Click "Load unpacked" and select the extension directory
+Install [Patchright MCP Bridge](https://chromewebstore.google.com/detail/playwright-mcp-bridge/mmlmfjhmonkocbjadbfplnigmagldckm) from the Chrome Web Store.
 
 ### Configure Patchright MCP server
 
@@ -52,7 +45,7 @@ By default, you'll need to approve each connection when the MCP server tries to 
 #### Using Your Unique Authentication Token
 
 1. After installing the extension, click on the extension icon or navigate to the extension's status page
-2. Copy the `PLAYWRIGHT_MCP_EXTENSION_TOKEN` value displayed in the extension UI (kept for compatibility)
+2. Copy the `PLAYWRIGHT_MCP_EXTENSION_TOKEN` value displayed in the extension UI
 3. Add it to your MCP server configuration:
 
 ```json
@@ -73,4 +66,5 @@ By default, you'll need to approve each connection when the MCP server tries to 
 ```
 
 This token is unique to your browser profile and provides secure authentication between the MCP server and the extension. Once configured, you won't need to manually approve connections each time.
+
 
