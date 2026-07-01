@@ -72,7 +72,14 @@ export type Config = {
      * }
      * ```
      */
-    launchOptions?: playwright.LaunchOptions;
+    launchOptions?: playwright.LaunchOptions & {
+      proxy?: {
+        server: string;
+        username?: string;
+        password?: string;
+        bypass?: string;
+      };
+    };
 
     /**
      * Context options for the browser context.
