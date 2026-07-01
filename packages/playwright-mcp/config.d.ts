@@ -57,6 +57,21 @@ export type Config = {
      *
      * This is useful for settings options like `channel`, `headless`, `executablePath`, etc.
      */
+    /**
+     * Launch options passed to Patchright.
+     * 
+     * **重要**：支持官方 proxy 配置，例如：
+     * ```ts
+     * launchOptions: {
+     *   proxy: {
+     *     server: 'http://127.0.0.1:8888',
+     *     username: 'user',     // 可选
+     *     password: 'pass',     // 可选
+     *     bypass: 'localhost,*.com' // 可选
+     *   }
+     * }
+     * ```
+     */
     launchOptions?: playwright.LaunchOptions;
 
     /**
