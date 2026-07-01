@@ -1,17 +1,17 @@
 {
-  "name": "patchright-mcp",
-  "version": "0.0.68",
-  "description": "Patchright Tools for MCP",
+  "name": "@jalikey/patchright-mcp",
+  "version": "0.0.69",
+  "description": "Patchright MCP Server (fork with better proxy support)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp.git"
+    "url": "git+https://github.com/jalikey/patchright-mcp.git"
   },
-  "homepage": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright-mcp",
+  "homepage": "https://github.com/jalikey/patchright-mcp",
   "engines": {
     "node": ">=18"
   },
   "author": {
-    "name": "Microsoft Corporation"
+    "name": "Your Name"
   },
   "license": "Apache-2.0",
   "scripts": {
