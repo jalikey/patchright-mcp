@@ -22,5 +22,14 @@ const { decorateCommand } = require('patchright/lib/mcp/program');
 
 const packageJSON = require('./package.json');
 const p = program.version('Version ' + packageJSON.version).name('Patchright MCP');
-decorateCommand(p, packageJSON.version)
+
+// 增强 proxy 支持
+const originalParse = program.parseAsync;
+program.parseAsync = async function(args) {
+  // 这里可以加自定义 proxy 逻辑，如果上游没完全透传
+  const result = await originalParse.call(this, args);
+  return result;
+};
+
+decorateCommand(p, packageJSON.version);
 void program.parseAsync(process.argv);
