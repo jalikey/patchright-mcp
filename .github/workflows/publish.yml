@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://npmjs.org
       # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
       - name: Update npm
         run: npm install -g npm@latest
@@ -40,9 +40,10 @@ jobs:
           npm version ${{ steps.canary-version.outputs.version }} --no-git-tag-version
         working-directory: ./packages/playwright-mcp
 
-      # 修改点：替换原有的 npm ci，自动兼容处理可能存在的不一致问题
+      # 修正：将原有的 npm ci 替换为 npm install，自动同步 Monorepo 锁文件
       - name: Install dependencies
         run: npm install
+        
       - run: npx playwright install --with-deps
       - run: npm run lint
       - run: npm run ctest
@@ -63,14 +64,15 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://npmjs.org
       # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
       - name: Update npm
         run: npm install -g npm@latest
         
-      # 修改点：替换原有的 npm ci，确保发版构建时的依赖锁定树稳定可用
+      # 修正：将原有的 npm ci 替换为 npm install，确保正式发版不因依赖不一致崩溃
       - name: Install dependencies
         run: npm install
+        
       - run: npx playwright install --with-deps
       - run: npm run lint
       - run: npm run ctest
@@ -116,7 +118,7 @@ jobs:
             local image="$1"
             local today=$(date -u +'%Y-%m-%d')
             # oras is re-using Docker credentials, so we don't need to login.
-            # Following the advice in https://portal.microsofticm.com/imp/v3/incidents/incident/476783820/summary
+            # Following the advice in https://microsofticm.com
             oras attach --artifact-type application/vnd.microsoft.artifact.lifecycle --annotation "vnd.microsoft.artifact.lifecycle.end-of-life.date=$today" $image
           }
           # for each tag, attach the eol manifest
@@ -135,9 +137,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      # 修改点：将原有的 npm ci 替换为 npm install，规避包不一致导致的打包阻断
+          
+      # 修正：将原有的 npm ci 替换为 npm install
       - name: Install extension dependencies
         run: npm install
+        
       - name: Build extension
         working-directory: ./packages/extension
         run: npm run build
