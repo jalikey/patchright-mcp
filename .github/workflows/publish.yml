@@ -45,14 +45,19 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      # 🛠️ FIX: Create a direct symlink mapping the old package name to your current directory
+      - name: Symlink old package name for tests
+        run: |
+          mkdir -p node_modules
+          cd node_modules
+          ln -s ../packages/playwright-mcp patchright-mcp
+        working-directory: ${{ github.workspace }}
+
       - run: npm run lint
 
-      # 🛠️ 终极修复：注入 NODE_PATH 环境变量，强制将项目的全局 node_modules 和当前包路径暴露给测试子进程
-      - name: Run canary tests with paths
+      - name: Run canary tests
         run: npm run ctest
         working-directory: ./packages/playwright-mcp
-        env:
-          NODE_PATH: ${{ github.workspace }}/node_modules:${{ github.workspace }}/packages/playwright-mcp
 
       - name: Configure NPM Registry Auth
         run: |
@@ -86,14 +91,19 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      # 🛠️ FIX: Create a direct symlink mapping the old package name to your current directory
+      - name: Symlink old package name for tests
+        run: |
+          mkdir -p node_modules
+          cd node_modules
+          ln -s ../packages/playwright-mcp patchright-mcp
+        working-directory: ${{ github.workspace }}
+
       - run: npm run lint
 
-      # 🛠️ 终极修复：同样注入 NODE_PATH
-      - name: Run release tests with paths
+      - name: Run release tests
         run: npm run ctest
         working-directory: ./packages/playwright-mcp
-        env:
-          NODE_PATH: ${{ github.workspace }}/node_modules:${{ github.workspace }}/packages/playwright-mcp
 
       - name: Configure NPM Registry Auth
         run: |
