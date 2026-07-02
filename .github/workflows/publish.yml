@@ -19,9 +19,12 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npmjs.org
-      # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
+
+      # 修复 403：清理 always-auth 配置并强制使用官方源升级 npm
       - name: Update npm
-        run: npm install -g npm@latest
+        run: |
+          npm config delete always-auth
+          npm install -g npm@latest --registry=https://npmjs.org
 
       - name: Get current date
         id: date
@@ -40,7 +43,7 @@ jobs:
           npm version ${{ steps.canary-version.outputs.version }} --no-git-tag-version
         working-directory: ./packages/playwright-mcp
 
-      # 修改点：仅替换原本报错的 npm ci 为 npm install
+      # 修复 EUSAGE：用 npm install 替代 npm ci
       - name: Install dependencies
         run: npm install
         
@@ -65,11 +68,14 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npmjs.org
-      # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
+
+      # 修复 403：清理 always-auth 配置并强制使用官方源升级 npm
       - name: Update npm
-        run: npm install -g npm@latest
-        
-      # 修改点：仅替换原本报错的 npm ci 为 npm install
+        run: |
+          npm config delete always-auth
+          npm install -g npm@latest --registry=https://npmjs.org
+
+      # 修复 EUSAGE：用 npm install 替代 npm ci
       - name: Install dependencies
         run: npm install
         
@@ -85,22 +91,25 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Needed for OIDC login to Azure
-    environment: allow-publishing-docker-to-acr
+      packages: write # 核心补全：赋予向 ghcr.io 推送和写入镜像的原生权限
     steps:
       - uses: actions/checkout@v5
-      - name: Set up QEMU # Needed for multi-platform builds (e.g., arm64 on amd64 runner)
+      
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx # Needed for multi-platform builds
+        
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Azure Login via OIDC
-        uses: azure/login@v2
+
+      # 核心重构：彻底抛弃 Azure，改用 GitHub 内置凭证秒登录 ghcr.io
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          client-id: ${{ secrets.AZURE_DOCKER_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_DOCKER_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_DOCKER_SUBSCRIPTION_ID }}
-      - name: Login to ACR
-        run: az acr login --name playwright
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 核心重构：将镜像推送到您自己的 ghcr.io 命名空间下
       - name: Build and push Docker image
         id: build-push
         uses: docker/build-push-action@v6
@@ -109,22 +118,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            playwright.azurecr.io/public/playwright/mcp:${{ github.event.release.tag_name }}
-            playwright.azurecr.io/public/playwright/mcp:latest
-      - uses: oras-project/setup-oras@v1
-      - name: Set oras tags
-        run: |
-          attach_eol_manifest() {
-            local image="$1"
-            local today=$(date -u +'%Y-%m-%d')
-            # oras is re-using Docker credentials, so we don't need to login.
-            # Following the advice in https://microsofticm.com
-            oras attach --artifact-type application/vnd.microsoft.artifact.lifecycle --annotation "vnd.microsoft.artifact.lifecycle.end-of-life.date=$today" $image
-          }
-          # for each tag, attach the eol manifest
-          for tag in $(echo ${{ steps.build-push-outputs.metadata['image.name'] }} | tr ',' '\n'); do
-            attach_eol_manifest $tag
-          done
+            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+            ghcr.io/${{ github.repository }}:latest
 
   package-release-extension:
     if: github.event_name == 'release'
@@ -137,8 +132,8 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          
-      # 修改点：仅替换原本报错的 npm ci 为 npm install
+
+      # 修复 EUSAGE：用 npm install 替代 npm ci
       - name: Install extension dependencies
         run: npm install
         
