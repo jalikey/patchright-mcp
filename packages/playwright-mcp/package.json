@@ -1,6 +1,6 @@
 {
   "name": "patchright-mcp-jalikey",
-  "version": "0.0.69",
+  "version": "0.0.70",
   "description": "Patchright MCP Server (fork with better proxy support)",
   "repository": {
     "type": "git",
