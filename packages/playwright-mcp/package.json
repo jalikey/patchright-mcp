@@ -1,5 +1,5 @@
 {
-  "name": "@jalikey/patchright-mcp",
+  "name": "patchright-mcp-jalikey",
   "version": "0.0.69",
   "description": "Patchright MCP Server (fork with better proxy support)",
   "repository": {
