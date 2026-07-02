@@ -20,8 +20,6 @@ jobs:
         with:
           node-version: 20
 
-      # 彻底移除会报错的全局升级步骤，直接进入版本号修改
-
       - name: Get current date
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
@@ -39,16 +37,19 @@ jobs:
           npm version ${{ steps.canary-version.outputs.version }} --no-git-tag-version
         working-directory: ./packages/playwright-mcp
 
-      # 在百分之百干净的环境下安装，没有 registry-url 干扰，绝对不会报 403 越权
       - name: Install dependencies
         run: npm install
         
       - run: npx playwright install --with-deps
+
+      # 🛠️ FIX: Build the monorepo workspace packages first so they can be discovered by test modules
+      - name: Build packages
+        run: npm run build
+
       - run: npm run lint
       - run: npm run ctest
         working-directory: ./packages/playwright-mcp
 
-      # 只在发布前一秒注入临时鉴权配置
       - name: Configure NPM Registry Auth
         run: |
           echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > ~/.npmrc
@@ -77,6 +78,11 @@ jobs:
         run: npm install
         
       - run: npx playwright install --with-deps
+
+      # 🛠️ FIX: Build the monorepo workspace packages first
+      - name: Build packages
+        run: npm run build
+
       - run: npm run lint
       - run: npm run ctest
         working-directory: ./packages/playwright-mcp
