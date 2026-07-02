@@ -1,7 +1,8 @@
 name: Publish
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 8 * * *'
   release:
     types: [published]
 
@@ -16,12 +17,11 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 24  # 升级至最新的官方默认支持版本，消除 Node 20 弃用警告
-          registry-url: https://registry.npmjs.org/
-          
-      # 修复 403 漏洞：显式强制指定官方镜像源，阻止潜在的废弃全局配置干扰鉴权
-      - name: Update npm Safely
-        run: npm install -g npm@latest --registry=https://registry.npmjs.org/
+          node-version: 20
+          registry-url: https://npmjs.org
+      # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Get current date
         id: date
@@ -40,6 +40,7 @@ jobs:
           npm version ${{ steps.canary-version.outputs.version }} --no-git-tag-version
         working-directory: ./packages/playwright-mcp
 
+      # 修改点：仅替换原本报错的 npm ci 为 npm install
       - name: Install dependencies
         run: npm install
         
@@ -62,13 +63,13 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 24  # 统一使用 Node 24 基础镜像
-          registry-url: https://registry.npmjs.org/
-          
-      # 修复 403 漏洞：显式强制指定官方镜像源
-      - name: Update npm Safely
-        run: npm install -g npm@latest --registry=https://registry.npmjs.org/
+          node-version: 20
+          registry-url: https://npmjs.org
+      # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
+      - name: Update npm
+        run: npm install -g npm@latest
         
+      # 修改点：仅替换原本报错的 npm ci 为 npm install
       - name: Install dependencies
         run: npm install
         
@@ -84,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # 必须保留，供 OIDC 登录至 Azure 获取令牌使用
+      id-token: write # Needed for OIDC login to Azure
     environment: allow-publishing-docker-to-acr
     steps:
       - uses: actions/checkout@v5
@@ -92,16 +93,12 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx # Needed for multi-platform builds
         uses: docker/setup-buildx-action@v3
-        
-      # 彻底解决 Login failed 核心漏洞：
-      # 必须要向 azure-login 填充对应所需的密匙变量，确保从 secrets 中读取。如果依然报错，请检查您的 Repo Secrets
       - name: Azure Login via OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_DOCKER_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_DOCKER_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_DOCKER_SUBSCRIPTION_ID }}
-          
       - name: Login to ACR
         run: az acr login --name playwright
       - name: Build and push Docker image
@@ -120,9 +117,12 @@ jobs:
           attach_eol_manifest() {
             local image="$1"
             local today=$(date -u +'%Y-%m-%d')
+            # oras is re-using Docker credentials, so we don't need to login.
+            # Following the advice in https://microsofticm.com
             oras attach --artifact-type application/vnd.microsoft.artifact.lifecycle --annotation "vnd.microsoft.artifact.lifecycle.end-of-life.date=$today" $image
           }
-          for tag in $(echo ${{ steps.build-push.outputs.metadata['image.name'] }} | tr ',' '\n'); do
+          # for each tag, attach the eol manifest
+          for tag in $(echo ${{ steps.build-push-outputs.metadata['image.name'] }} | tr ',' '\n'); do
             attach_eol_manifest $tag
           done
 
@@ -135,9 +135,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 24  # 统一使用 Node 24 基础镜像
+          node-version: 20
           cache: 'npm'
           
+      # 修改点：仅替换原本报错的 npm ci 为 npm install
       - name: Install extension dependencies
         run: npm install
         
