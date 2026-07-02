@@ -1,7 +1,8 @@
 name: Publish
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 8 * * *'
   release:
     types: [published]
 
@@ -14,10 +15,12 @@ jobs:
       id-token: write  # Required for OIDC npm publishing
     steps:
       - uses: actions/checkout@v5
+      
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-          registry-url: https://npmjs.org
+
+      # 彻底移除会报错的全局升级步骤，直接进入版本号修改
 
       - name: Get current date
         id: date
@@ -36,7 +39,7 @@ jobs:
           npm version ${{ steps.canary-version.outputs.version }} --no-git-tag-version
         working-directory: ./packages/playwright-mcp
 
-      # Fix EUSAGE: Use npm install instead of npm ci to sync lockfile automatically
+      # 在百分之百干净的环境下安装，没有 registry-url 干扰，绝对不会报 403 越权
       - name: Install dependencies
         run: npm install
         
@@ -45,9 +48,18 @@ jobs:
       - run: npm run ctest
         working-directory: ./packages/playwright-mcp
 
+      # 只在发布前一秒注入临时鉴权配置
+      - name: Configure NPM Registry Auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > ~/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to npm with next tag
         run: npm publish --tag next
         working-directory: ./packages/playwright-mcp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-mcp-release-npm:
     if: github.event_name == 'release'
@@ -60,9 +72,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-          registry-url: https://npmjs.org
-
-      # Fix EUSAGE: Use npm install instead of npm ci
+        
       - name: Install dependencies
         run: npm install
         
@@ -70,8 +80,17 @@ jobs:
       - run: npm run lint
       - run: npm run ctest
         working-directory: ./packages/playwright-mcp
+
+      - name: Configure NPM Registry Auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > ~/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - run: npm publish
         working-directory: ./packages/playwright-mcp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-mcp-release-docker:
     if: github.event_name == 'release'
@@ -118,7 +137,6 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      # Fix EUSAGE: Use npm install instead of npm ci
       - name: Install extension dependencies
         run: npm install
         
