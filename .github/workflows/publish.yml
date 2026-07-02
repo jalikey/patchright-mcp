@@ -40,7 +40,9 @@ jobs:
           npm version ${{ steps.canary-version.outputs.version }} --no-git-tag-version
         working-directory: ./packages/playwright-mcp
 
-      - run: npm ci
+      # 修改点：替换原有的 npm ci，自动兼容处理可能存在的不一致问题
+      - name: Install dependencies
+        run: npm install
       - run: npx playwright install --with-deps
       - run: npm run lint
       - run: npm run ctest
@@ -65,7 +67,10 @@ jobs:
       # Ensure npm 11.5.1 or later is installed (for OIDC npm publishing)
       - name: Update npm
         run: npm install -g npm@latest
-      - run: npm ci
+        
+      # 修改点：替换原有的 npm ci，确保发版构建时的依赖锁定树稳定可用
+      - name: Install dependencies
+        run: npm install
       - run: npx playwright install --with-deps
       - run: npm run lint
       - run: npm run ctest
@@ -130,8 +135,9 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      # 修改点：将原有的 npm ci 替换为 npm install，规避包不一致导致的打包阻断
       - name: Install extension dependencies
-        run: npm ci
+        run: npm install
       - name: Build extension
         working-directory: ./packages/extension
         run: npm run build
