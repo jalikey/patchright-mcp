@@ -42,13 +42,17 @@ jobs:
         
       - run: npx playwright install --with-deps
 
-      # 🛠️ FIX: Build the monorepo workspace packages first so they can be discovered by test modules
       - name: Build packages
         run: npm run build
 
       - run: npm run lint
-      - run: npm run ctest
+
+      # 🛠️ 终极修复：注入 NODE_PATH 环境变量，强制将项目的全局 node_modules 和当前包路径暴露给测试子进程
+      - name: Run canary tests with paths
+        run: npm run ctest
         working-directory: ./packages/playwright-mcp
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules:${{ github.workspace }}/packages/playwright-mcp
 
       - name: Configure NPM Registry Auth
         run: |
@@ -79,13 +83,17 @@ jobs:
         
       - run: npx playwright install --with-deps
 
-      # 🛠️ FIX: Build the monorepo workspace packages first
       - name: Build packages
         run: npm run build
 
       - run: npm run lint
-      - run: npm run ctest
+
+      # 🛠️ 终极修复：同样注入 NODE_PATH
+      - name: Run release tests with paths
+        run: npm run ctest
         working-directory: ./packages/playwright-mcp
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules:${{ github.workspace }}/packages/playwright-mcp
 
       - name: Configure NPM Registry Auth
         run: |
